@@ -6,7 +6,7 @@ assignee: null
 epic: null
 dueDate: null
 created: "2026-10-15T09:11:01.732Z"
-modified: "2026-10-15T09:11:01.732Z"
+modified: "2026-10-22T12:18:10.031Z"
 completedAt: null
 labels: []
 order: "Zz"
@@ -16,3 +16,5 @@ order: "Zz"
 Sometimes it's hard to tell that a filter is applied. I created a note the other day and couldn't find it in the board, and it took me a while to understand that it was not showing because there was a filter applied.
 
 I want to make it clear in the UI that a filter is applied, so the user is fully aware of it. It should be communicated even if the filter bar is collapsed. Maybe also show a badge with the count of how many tags as currently in the filter.
+
+This is also valid for searching. If cards are hidden for any reason, we should communicate that clearly.
