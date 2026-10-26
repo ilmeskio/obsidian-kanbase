@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
+  compareByIndex,
   compareOrderValues,
   copyLegacyOrderIfMissing,
   generateOrderKey,
   generateOrderKeys,
+  indexPaths,
   isOrderKey,
   readFrontmatterOrder,
   readOrderValue,
@@ -79,5 +81,19 @@ describe("fractional card ordering", () => {
       kanban_order: "a0",
       kanbase_order: "b0",
     });
+  });
+});
+
+describe("Bases order", () => {
+  it("ranks paths by the position Bases delivered them in", () => {
+    const index = indexPaths(["b.md", "a.md", "c.md"]);
+    expect(compareByIndex(index, "b.md", "a.md")).toBeLessThan(0);
+    expect(compareByIndex(index, "c.md", "a.md")).toBeGreaterThan(0);
+    expect(compareByIndex(index, "a.md", "a.md")).toBe(0);
+  });
+
+  it("treats unknown paths as equal so later tie-breakers still apply", () => {
+    const index = indexPaths(["a.md"]);
+    expect(compareByIndex(index, "x.md", "y.md")).toBe(0);
   });
 });
