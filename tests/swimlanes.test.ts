@@ -4,6 +4,7 @@ import {
   displayRowValue,
   readRowValues,
   replaceRowValue,
+  storedRowsApply,
 } from "../src/board/swimlanes";
 
 describe("swimlane row values", () => {
@@ -100,5 +101,20 @@ describe("swimlane row titles", () => {
   it("leaves other values unchanged", () => {
     expect(displayRowValue("Alice")).toBe("Alice");
     expect(displayRowValue("Home [[draft]]")).toBe("Home [[draft]]");
+  });
+});
+
+describe("stored swimlane rows", () => {
+  it("apply when they were saved for the same property", () => {
+    expect(storedRowsApply("area", "area")).toBe(true);
+  });
+
+  it("apply to configs that never recorded a property", () => {
+    expect(storedRowsApply(undefined, "area")).toBe(true);
+  });
+
+  it("do not apply once another property is picked", () => {
+    expect(storedRowsApply("area", "status")).toBe(false);
+    expect(storedRowsApply("area", null)).toBe(false);
   });
 });

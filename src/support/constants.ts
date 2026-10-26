@@ -45,6 +45,8 @@ export const CONFIG_KEY_ADD_TO_TOP = "newCardsToTop";
 
 /** Key used by BasesViewConfig.set/get to persist the swimlane config (property) in the .base file. */
 export const CONFIG_KEY_SWIMLANE = "swimlane";
+export const CONFIG_KEY_SWIMLANE_PROPERTY = "swimlaneProperty";
+export const CONFIG_KEY_SWIMLANE_ROWS_PROPERTY = "swimlaneRowsProperty";
 
 /** Key used by BasesViewConfig.set/get to persist swimlane row order. */
 export const CONFIG_KEY_SWIMLANE_ROWS = "swimlaneRows";

@@ -2,6 +2,7 @@ import {
   BasesView,
   BasesEntryGroup,
   BasesAllOptions,
+  BasesPropertyId,
   HoverParent,
   HoverPopover,
   QueryController,
@@ -127,6 +128,15 @@ export class KanbanView extends BasesView implements HoverParent {
    */
   static getViewOptions(): BasesAllOptions[] {
     return [
+      {
+        key: "swimlaneProperty",
+        type: "property" as const,
+        displayName: "Swimlanes",
+        placeholder: "None",
+        // Cards move between rows by writing frontmatter, so only note
+        // properties make sense (not file properties or formulas).
+        filter: (prop: BasesPropertyId) => prop.startsWith("note."),
+      },
       {
         type: "group" as const,
         displayName: "Display",
