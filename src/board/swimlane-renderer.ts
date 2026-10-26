@@ -2,6 +2,7 @@ import { BasesEntry, Menu, setIcon } from "obsidian";
 import type { KanbanView } from "../kanban-view";
 import { getGroupForColumn } from "./board-grouping";
 import { discoverRows, partitionEntriesByRow } from "./swimlane-query";
+import { displayRowValue } from "./swimlanes";
 import { NO_VALUE_SWIMLANE } from "../support/constants";
 
 /**
@@ -85,7 +86,7 @@ export class SwimlaneManager {
     });
 
     const titleEl = headerEl.createSpan({
-      text: rowValue,
+      text: displayRowValue(rowValue),
       cls: "kanbase-swimlane-title",
     });
     if (rowValue === NO_VALUE_SWIMLANE)

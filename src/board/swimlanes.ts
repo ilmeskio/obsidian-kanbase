@@ -28,8 +28,23 @@ export function readRowValues(
 }
 
 /**
+ * Title shown for a swimlane row. A wikilink value such as `[[Home]]` or
+ * `[[Areas/Home|Home area]]` is shown as its alias or note name, without the
+ * brackets; any other value is shown unchanged.
+ */
+export function displayRowValue(row: string): string {
+  const link = /^\[\[([^\]|]*)(?:\|([^\]]*))?\]\]$/.exec(row);
+  if (!link) return row;
+  const alias = link[2]?.trim();
+  if (alias) return alias;
+  return (link[1] ?? "").split("/").pop()?.trim() ?? row;
+}
+
+/**
  * Move a card from one swimlane row to another, keeping every other row it
- * belongs to untouched. Passing `null` for `fromRow`/`toRow` means "no
+ * belongs to untouched. The property stays a single value when it held one
+ * (as in `area: "[[Home]]"`) and only becomes a list once a card belongs to
+ * several rows. Passing `null` for `fromRow`/`toRow` means "no
  * previous/new row membership to change".
  */
 export function replaceRowValue(
@@ -39,6 +54,7 @@ export function replaceRowValue(
   toRow: string | null,
 ): void {
   const current = readRowValues(frontmatter, property);
+  const wasList = Array.isArray(frontmatter[property]);
   const next = current.filter(
     (row) => row !== fromRow && row !== NO_VALUE_SWIMLANE,
   );
@@ -46,7 +62,8 @@ export function replaceRowValue(
     next.push(toRow);
   }
   if (next.length) {
-    frontmatter[property] = next;
+    // A property that held a single value keeps holding a single value.
+    frontmatter[property] = !wasList && next.length === 1 ? next[0] : next;
   } else {
     delete frontmatter[property];
   }
@@ -60,6 +77,8 @@ export function addRowValue(
 ): void {
   if (row === NO_VALUE_SWIMLANE) return;
   const current = readRowValues(frontmatter, property);
+  const wasList = Array.isArray(frontmatter[property]);
   if (!current.includes(row)) current.push(row);
-  frontmatter[property] = current;
+  frontmatter[property] =
+    !wasList && current.length === 1 ? current[0] : current;
 }

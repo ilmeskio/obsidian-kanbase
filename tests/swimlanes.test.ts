@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   addRowValue,
+  displayRowValue,
   readRowValues,
   replaceRowValue,
 } from "../src/board/swimlanes";
@@ -56,6 +57,48 @@ describe("swimlane row values", () => {
   it("just adds the row when there was no previous membership", () => {
     const fm: Record<string, unknown> = {};
     replaceRowValue(fm, "lanes", null, "Alice");
-    expect(fm.lanes).toEqual(["Alice"]);
+    expect(fm.lanes).toBe("Alice");
+  });
+
+  it("keeps a single value single when moving between rows", () => {
+    const fm: Record<string, unknown> = { lanes: "[[Home]]" };
+    replaceRowValue(fm, "lanes", "[[Home]]", "[[Work]]");
+    expect(fm.lanes).toBe("[[Work]]");
+  });
+
+  it("keeps a list a list when it ends up with one value", () => {
+    const fm: Record<string, unknown> = { lanes: ["Alice", "Bob"] };
+    replaceRowValue(fm, "lanes", "Alice", null);
+    expect(fm.lanes).toEqual(["Bob"]);
+  });
+
+  it("turns a single value into a list only when a second row is added", () => {
+    const fm: Record<string, unknown> = { lanes: "Alice" };
+    addRowValue(fm, "lanes", "Alice");
+    expect(fm.lanes).toBe("Alice");
+    addRowValue(fm, "lanes", "Bob");
+    expect(fm.lanes).toEqual(["Alice", "Bob"]);
+  });
+
+  it("adds a first row as a single value", () => {
+    const fm: Record<string, unknown> = {};
+    addRowValue(fm, "lanes", "Alice");
+    expect(fm.lanes).toBe("Alice");
+  });
+});
+
+describe("swimlane row titles", () => {
+  it("shows a wikilink as its note name", () => {
+    expect(displayRowValue("[[Home]]")).toBe("Home");
+    expect(displayRowValue("[[Areas/Home]]")).toBe("Home");
+  });
+
+  it("prefers the alias of a wikilink", () => {
+    expect(displayRowValue("[[Areas/Home|Home area]]")).toBe("Home area");
+  });
+
+  it("leaves other values unchanged", () => {
+    expect(displayRowValue("Alice")).toBe("Alice");
+    expect(displayRowValue("Home [[draft]]")).toBe("Home [[draft]]");
   });
 });
