@@ -4,6 +4,7 @@ import {
   CONFIG_KEY_COVER_PROPERTY,
   CONFIG_KEY_OPEN_BEHAVIOR,
   CONFIG_KEY_SWIMLANE,
+  CONFIG_KEY_SWIMLANE_PROPERTY,
 } from "../support/constants";
 import { applyGroupByValue, getGroupByValueType } from "./board-grouping";
 
@@ -29,13 +30,19 @@ export class BoardConfig {
   }
 
   /**
-   * The frontmatter property used to split cards into swimlane rows, read
-   * from the `.base` file's own `swimlane.property` view config. Unlike
-   * `groupBy`, Bases has no native concept of this, so it's plugin-owned
-   * config the user must set manually in the `.base` file. Absent means no
-   * swimlanes — the board renders exactly as it does today.
+   * The frontmatter property used to split cards into swimlane rows. It is
+   * picked in the Bases view options (`swimlaneProperty`); `.base` files that
+   * set `swimlane.property` by hand keep working. Absent means no swimlanes —
+   * the board renders exactly as it does today.
    */
   public getSwimlaneProperty(): string | null {
+    // The property picked in the Bases view options takes precedence over the
+    // older `swimlane.property` written by hand in the `.base` file.
+    const picked = this.getConfig()?.getAsPropertyId(
+      CONFIG_KEY_SWIMLANE_PROPERTY,
+    );
+    if (picked) return this.stripNotePrefix(picked);
+
     const cfg = this.getConfig() as
       | { swimlane?: { property?: string }; get(key: string): unknown }
       | undefined;
@@ -51,10 +58,13 @@ export class BoardConfig {
   /** Set (or, when `property` is null, clear) the swimlane property. */
   public setSwimlaneProperty(property: string | null): void {
     const trimmed = property?.trim();
-    this.getConfig()?.set(
-      CONFIG_KEY_SWIMLANE,
-      trimmed ? { property: trimmed } : null,
+    const config = this.getConfig();
+    config?.set(
+      CONFIG_KEY_SWIMLANE_PROPERTY,
+      trimmed ? `note.${this.stripNotePrefix(trimmed)}` : null,
     );
+    // Drop the older `swimlane.property` so it can't shadow the new value.
+    config?.set(CONFIG_KEY_SWIMLANE, null);
     this.onChange();
   }
 

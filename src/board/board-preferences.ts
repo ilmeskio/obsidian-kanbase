@@ -4,6 +4,7 @@ import {
   CONFIG_KEY_COLUMN_COLORS,
   CONFIG_KEY_COLUMNS,
   CONFIG_KEY_SWIMLANE_ROWS,
+  CONFIG_KEY_SWIMLANE_ROWS_PROPERTY,
   CONFIG_KEY_TAG_FILTERS,
   CONFIG_KEY_TAG_FILTERS_VISIBLE,
   CONFIG_KEY_TAG_SELECTED_FIRST,
@@ -14,6 +15,7 @@ import {
 import type { ActiveTagFilterState } from "../tags/tag-filter-state";
 import type { TagSortOrder } from "../tags/tag-sort-control";
 import type { KanbanView } from "../kanban-view";
+import { storedRowsApply } from "./swimlanes";
 
 export class BoardPreferences {
   private view: KanbanView;
@@ -169,8 +171,17 @@ export class BoardPreferences {
   public getSwimlaneRows(discoveredRows: string[]): string[] {
     const stored = this.view.config?.get(CONFIG_KEY_SWIMLANE_ROWS) as
       string[] | undefined;
-    const rows = stored?.length ? [...stored] : [];
-    let changed = false;
+    // Rows saved for another property (the user picked a different one)
+    // are dropped, so they don't linger as empty rows.
+    const storedFor = this.view.config?.get(
+      CONFIG_KEY_SWIMLANE_ROWS_PROPERTY,
+    ) as string | undefined;
+    const applies = storedRowsApply(
+      storedFor,
+      this.view.boardConfig.getSwimlaneProperty(),
+    );
+    const rows = applies && stored?.length ? [...stored] : [];
+    let changed = !applies;
     for (const row of discoveredRows) {
       if (!rows.includes(row)) {
         rows.push(row);
@@ -183,6 +194,10 @@ export class BoardPreferences {
 
   public saveSwimlaneRows(rows: string[]): void {
     this.view.config?.set(CONFIG_KEY_SWIMLANE_ROWS, rows);
+    this.view.config?.set(
+      CONFIG_KEY_SWIMLANE_ROWS_PROPERTY,
+      this.view.boardConfig.getSwimlaneProperty(),
+    );
   }
 
   public isSwimlaneCollapsed(row: string): boolean {

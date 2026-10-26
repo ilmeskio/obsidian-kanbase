@@ -63,3 +63,15 @@ export function addRowValue(
   if (!current.includes(row)) current.push(row);
   frontmatter[property] = current;
 }
+
+/**
+ * Whether the row order stored in the view config still belongs to the
+ * property now used for swimlanes. Configs written before the order
+ * remembered its property (`storedFor` undefined) are assumed to match.
+ */
+export function storedRowsApply(
+  storedFor: string | undefined,
+  property: string | null,
+): boolean {
+  return storedFor === undefined || storedFor === property;
+}

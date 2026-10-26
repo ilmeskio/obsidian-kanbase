@@ -3,6 +3,7 @@ import {
   addRowValue,
   readRowValues,
   replaceRowValue,
+  storedRowsApply,
 } from "../src/board/swimlanes";
 
 describe("swimlane row values", () => {
@@ -57,5 +58,20 @@ describe("swimlane row values", () => {
     const fm: Record<string, unknown> = {};
     replaceRowValue(fm, "lanes", null, "Alice");
     expect(fm.lanes).toEqual(["Alice"]);
+  });
+});
+
+describe("stored swimlane rows", () => {
+  it("apply when they were saved for the same property", () => {
+    expect(storedRowsApply("area", "area")).toBe(true);
+  });
+
+  it("apply to configs that never recorded a property", () => {
+    expect(storedRowsApply(undefined, "area")).toBe(true);
+  });
+
+  it("do not apply once another property is picked", () => {
+    expect(storedRowsApply("area", "status")).toBe(false);
+    expect(storedRowsApply("area", null)).toBe(false);
   });
 });
