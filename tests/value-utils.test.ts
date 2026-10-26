@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { coerceColumnValue } from "../src/support/value-utils";
+import { coerceColumnValue, parseColumnList } from "../src/support/value-utils";
 
 describe("coerceColumnValue", () => {
   it("keeps a real boolean type for checkbox columns", () => {
@@ -38,5 +38,27 @@ describe("coerceColumnValue", () => {
     expect(coerceColumnValue("false", "other")).toBe("false");
     expect(coerceColumnValue("3", "other")).toBe("3");
     expect(coerceColumnValue("Done", "other")).toBe("Done");
+  });
+});
+
+describe("parseColumnList", () => {
+  it("splits a comma separated option and trims each name", () => {
+    expect(parseColumnList("done, backlog ,  later")).toEqual([
+      "done",
+      "backlog",
+      "later",
+    ]);
+  });
+
+  it("accepts a YAML list written by hand", () => {
+    expect(parseColumnList(["done", " backlog "])).toEqual(["done", "backlog"]);
+  });
+
+  it("returns an empty list for empty or unsupported values", () => {
+    expect(parseColumnList("")).toEqual([]);
+    expect(parseColumnList(undefined)).toEqual([]);
+    expect(parseColumnList(null)).toEqual([]);
+    expect(parseColumnList(3)).toEqual([]);
+    expect(parseColumnList(["done", 3, ""])).toEqual(["done"]);
   });
 });

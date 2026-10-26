@@ -152,6 +152,13 @@ export class KanbanView extends BasesView implements HoverParent {
             placeholder: "E.g. cover",
           },
           {
+            key: "collapsedByDefault",
+            type: "text" as const,
+            displayName: "Collapsed by default",
+            default: "",
+            placeholder: "E.g. done, backlog",
+          },
+          {
             key: "newCardsToTop",
             type: "toggle" as const,
             displayName: "Add new cards to top",

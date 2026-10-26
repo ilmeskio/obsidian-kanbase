@@ -1,4 +1,5 @@
 import {
+  CONFIG_KEY_COLLAPSED_BY_DEFAULT,
   CONFIG_KEY_COLLAPSED_COLUMNS,
   CONFIG_KEY_COLLAPSED_SWIMLANES,
   CONFIG_KEY_COLUMN_COLORS,
@@ -14,9 +15,16 @@ import {
 import type { ActiveTagFilterState } from "../tags/tag-filter-state";
 import type { TagSortOrder } from "../tags/tag-sort-control";
 import type { KanbanView } from "../kanban-view";
+import { parseColumnList } from "../support/value-utils";
 
 export class BoardPreferences {
   private view: KanbanView;
+  /**
+   * Columns listed in the "Collapsed by default" option are collapsed every
+   * time the board opens. Toggling one only lasts until the view is closed,
+   * so nothing is written back to the `.base` file.
+   */
+  private sessionCollapsed = new Map<string, boolean>();
 
   constructor(view: KanbanView) {
     this.view = view;
@@ -132,10 +140,23 @@ export class BoardPreferences {
   }
 
   public isColumnCollapsed(columnName: string): boolean {
-    return !!this.getCollapsedColumns()[columnName];
+    const session = this.sessionCollapsed.get(columnName);
+    if (session !== undefined) return session;
+    return (
+      !!this.getCollapsedColumns()[columnName] ||
+      this.getCollapsedByDefault().includes(columnName)
+    );
   }
 
   public toggleColumnCollapsed(columnName: string): void {
+    if (this.getCollapsedByDefault().includes(columnName)) {
+      this.sessionCollapsed.set(
+        columnName,
+        !this.isColumnCollapsed(columnName),
+      );
+      this.view.updates.scheduleRender();
+      return;
+    }
     const collapsed = this.getCollapsedColumns();
     if (collapsed[columnName]) {
       delete collapsed[columnName];
@@ -219,6 +240,12 @@ export class BoardPreferences {
     return raw && typeof raw === "object"
       ? (raw as Record<string, number>)
       : {};
+  }
+
+  private getCollapsedByDefault(): string[] {
+    return parseColumnList(
+      this.view.config?.get(CONFIG_KEY_COLLAPSED_BY_DEFAULT),
+    );
   }
 
   private getCollapsedColumns(): Record<string, boolean> {

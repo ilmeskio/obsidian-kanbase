@@ -34,3 +34,20 @@ export function coerceColumnValue(
   }
   return columnName;
 }
+
+/**
+ * Read a list of column names from a view option. The option is typed as text
+ * in the Bases settings (comma separated, e.g. "done, backlog"), but a YAML
+ * list written by hand in the `.base` file works too.
+ */
+export function parseColumnList(raw: unknown): string[] {
+  const items = Array.isArray(raw)
+    ? raw
+    : typeof raw === "string"
+      ? raw.split(",")
+      : [];
+  return items
+    .filter((item): item is string => typeof item === "string")
+    .map((item) => item.trim())
+    .filter((item) => item.length > 0);
+}
