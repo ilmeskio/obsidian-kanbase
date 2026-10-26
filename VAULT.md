@@ -30,8 +30,11 @@ git switch main && git merge --ff-only upstream/main && git push origin main
 for b in fix/swimlane-single-values fix/respect-bases-order feat/collapsed-by-default; do
   git switch "$b" && git rebase main
 done
-git switch vault && git reset --hard main
+git switch -C vault main
 for b in fix/swimlane-single-values fix/respect-bases-order feat/collapsed-by-default; do git merge --no-edit "$b"; done
+git checkout origin/vault -- VAULT.md scripts/install-to-vault.sh
+git commit -m "Add vault install script and fork notes"
+scripts/install-to-vault.sh
 ```
 
-Il ramo `vault` si ricrea da `main` più le modifiche, ma questo file e lo script vanno rimessi: dopo il `reset` si recuperano da `origin/vault`.
+Il ramo `vault` si ricrea da `main` più le modifiche. Questo file e lo script non stanno in nessun altro ramo, quindi si recuperano da `origin/vault` prima di pubblicare il nuovo `vault`.
