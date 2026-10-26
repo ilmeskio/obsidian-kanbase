@@ -10,6 +10,7 @@ import {
 import { KanbanView } from "../kanban-view";
 import { InputModal, WipLimitModal } from "../ui/modals";
 import { NO_VALUE_COLUMN } from "../support/constants";
+import { compareByIndex, indexPaths } from "../support/order";
 import { ColorPickerModal } from "../ui/color-picker-modal";
 
 export class ColumnManager {
@@ -41,7 +42,11 @@ export class ColumnManager {
     const allowDrag = options?.allowDrag ?? true;
     const isCollapsed = this.view.preferences.isColumnCollapsed(columnName);
 
-    // Sort entries up-front using a stable fallback
+    // Cards with a stored Kanbase order come first; the rest keep the order
+    // Bases gave them, so the view's `sort` is honoured.
+    const basesOrder = indexPaths(
+      displayEntries.map((entry) => entry.file?.path ?? ""),
+    );
     const sorted = [...displayEntries].sort((a: BasesEntry, b: BasesEntry) => {
       const pathA = a.file?.path ?? "";
       const pathB = b.file?.path ?? "";
@@ -51,6 +56,8 @@ export class ColumnManager {
         pathB,
       );
       if (orderComparison !== 0) return orderComparison;
+      const basesComparison = compareByIndex(basesOrder, pathA, pathB);
+      if (basesComparison !== 0) return basesComparison;
       const timeA = a.file?.stat.ctime ?? 0;
       const timeB = b.file?.stat.ctime ?? 0;
       if (timeA !== timeB) return timeA - timeB;

@@ -71,3 +71,20 @@ export function isOrderKey(value: OrderValue): value is string {
     return false;
   }
 }
+
+/**
+ * Position of each path in the order Bases delivered the entries. Bases has
+ * already applied the view's own `sort`, so this order should break ties
+ * between cards that have no stored Kanbase order yet.
+ */
+export function indexPaths(paths: string[]): Map<string, number> {
+  return new Map(paths.map((path, index) => [path, index]));
+}
+
+export function compareByIndex(
+  index: Map<string, number>,
+  a: string,
+  b: string,
+): number {
+  return (index.get(a) ?? 0) - (index.get(b) ?? 0);
+}
